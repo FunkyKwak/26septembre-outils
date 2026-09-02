@@ -1,3 +1,4 @@
+from asyncio import log
 import csv
 from toolkit import coordinates
 from collections import defaultdict
@@ -10,16 +11,29 @@ def add_missing_cols (data, original_columns, missing_columns):
         if col not in original_columns and col not in ("Type de contact", "Ville la plus proche", "Code postal ville", "Distance km"):
             data[col] = ""
 
-def get_output_cols (signataire_columns, volontaire_columns):
+def get_output_cols (signataire_columns=None, volontaire_columns=None):
 
-    signataire_columns
-    return ["Type de contact"] + list(signataire_columns) + [
-        col for col in volontaire_columns if col not in signataire_columns
-    ] + [
-        "Ville la plus proche",
-        "Code postal ville",
-        "Distance km",
-    ]
+    if signataire_columns and volontaire_columns:
+        return ["Type de contact"] + list(signataire_columns) + [
+            col for col in volontaire_columns if col not in signataire_columns
+        ] + [
+            "Ville la plus proche",
+            "Code postal ville",
+            "Distance km",
+        ]
+    elif signataire_columns:
+        return list(signataire_columns) + [
+            "Ville la plus proche",
+            "Code postal ville",
+            "Distance km",
+        ]
+    else:
+        return list(volontaire_columns) + [
+            "Ville la plus proche",
+            "Code postal ville",
+            "Distance km",
+        ]
+
 
 def extend_output_dicts(signataire_villes, volontaire_villes):
     persons_villes = defaultdict(list)
@@ -33,9 +47,9 @@ def extend_output_dicts(signataire_villes, volontaire_villes):
 
 
 def get_closest_city(persons, type,
-                     signataire_columns, volontaire_columns,
                      communes_par_code_postal,
                      villes, villes_selectionnees,
+                     signataire_columns=None, volontaire_columns=None,
                      log=None):
 
     if log is None:
@@ -51,12 +65,13 @@ def get_closest_city(persons, type,
 
         person["Type de contact"] = type
 
-        if (type=="signataire"):
-            person["Signé/Inscrit le"] = person["Signé le"]
-            add_missing_cols(person, signataire_columns, volontaire_columns)
-        if (type=="volontaire"):
-            person["Signé/Inscrit le"] = person["Inscrit le"]
-            add_missing_cols(person, volontaire_columns, signataire_columns)
+        if signataire_columns and volontaire_columns:
+            if (type=="signataire"):
+                person["Signé/Inscrit le"] = person["Signé le"]
+                add_missing_cols(person, signataire_columns, volontaire_columns)
+            if (type=="volontaire"):
+                person["Signé/Inscrit le"] = person["Inscrit le"]
+                add_missing_cols(person, volontaire_columns, signataire_columns)
 
         code_postal = coordinates.normaliser_code_postal(
             person["Code postal"]
@@ -164,18 +179,21 @@ def executer(
     # ============================================================
     # 3. CHARGEMENT DES SIGNATAIRES / VOLONTAIRES
     # ============================================================
+    signataire_columns, volontaire_columns = None, None
+    signataires, volontaires = [], []
     if fichier_signataires:
         log("Chargement des signataires...")
         signataires, signataire_columns = input_files.read_csv_signataires(fichier_signataires)
         log(f"{len(signataires)} signataires chargés.")
+        if fichier_volontaires:
+            signataire_columns[signataire_columns.index("Signé le")] = "Signé/Inscrit le"
 
     if fichier_volontaires: 
         log("Chargement des volontaires...")
         volontaires, volontaire_columns = input_files.read_csv_volontaires(fichier_volontaires)
         log(f"{len(volontaires)} volontaires chargés.")
-
-    signataire_columns[signataire_columns.index("Signé le")] = "Signé/Inscrit le"
-    volontaire_columns[volontaire_columns.index("Inscrit le")] = "Signé/Inscrit le"
+        if fichier_signataires:
+            volontaire_columns[volontaire_columns.index("Inscrit le")] = "Signé/Inscrit le"
 
     # ============================================================
     # 4. RECHERCHE DE LA VILLE LA PLUS PROCHE
@@ -183,16 +201,16 @@ def executer(
 
     signataire_villes, signataires_sans_coordonnees = get_closest_city(
         signataires, "signataire",
-        signataire_columns, volontaire_columns,
         communes_par_code_postal,
         villes, villes_selectionnees,
+        signataire_columns, volontaire_columns,
         log
     )
     volontaire_villes, volontaires_sans_coordonnees = get_closest_city(
         volontaires, "volontaire",
-        signataire_columns, volontaire_columns,
         communes_par_code_postal,
         villes, villes_selectionnees,
+        signataire_columns, volontaire_columns,
         log
     )
 
@@ -207,13 +225,22 @@ def executer(
 
     colonnes_sortie = get_output_cols(signataire_columns, volontaire_columns)
 
+    fichier_sorties = []
+
+    if (fichier_signataires and fichier_volontaires):
+        prefix = "signataires_volontaires"
+    elif (fichier_signataires):
+        prefix = "signataires"
+    elif (fichier_volontaires):
+        prefix = "volontaires"
+
     if separer_fichiers:
         for ville, person_ville in persons_villes.items():
 
             if ville:
-                nom_fichier = f"signataires_{ville}.csv"
+                nom_fichier = f"{prefix}_{ville}.csv"
             else:
-                nom_fichier = "signataires_sans_ville.csv"
+                nom_fichier = f"{prefix}_sans_ville.csv"
 
             fichier_sortie = dossier_sortie + "/" + nom_fichier
 
@@ -233,13 +260,15 @@ def executer(
 
                 ecrivain.writeheader()
                 ecrivain.writerows(person_ville)
+
+            fichier_sorties.append(fichier_sortie)
     else:
         if (villes_selectionnees == []):
-            fichier_sortie = dossier_sortie + "/signataires_toutes_villes.csv"
+            fichier_sortie = dossier_sortie + f"/{prefix}_toutes_villes.csv"
         elif (len(villes_selectionnees) == 1):
-            fichier_sortie = dossier_sortie + f"/signataires_{villes_selectionnees[0]}.csv"
+            fichier_sortie = dossier_sortie + f"/{prefix}_{villes_selectionnees[0]}.csv"
         else:
-            fichier_sortie = dossier_sortie + "/signataires_villes_selectionnees.csv"
+            fichier_sortie = dossier_sortie + f"/{prefix}_villes_selectionnees.csv"
 
         with open(
             fichier_sortie,
@@ -259,13 +288,20 @@ def executer(
             for ville, person_ville in persons_villes.items():
                 ecrivain.writerows(person_ville)
 
+            fichier_sorties.append(fichier_sortie)
+
 
     # ============================================================
     # 6. RÉSUMÉ
     # ============================================================
 
     log("Terminé !")
-    log(f"Résultat : {fichier_sortie}")
+
+    if len(fichier_sorties) == 1:
+        rtn = f"Résultat : {fichier_sorties[0]}"
+    else:
+        rtn = f"Résultat : {len(fichier_sorties)} fichiers générés"
+    log(rtn)
     log(f"Signataires : {len(signataires)}")
     log(f"Volontaires : {len(volontaires)}")
 
@@ -274,3 +310,5 @@ def executer(
 
     if volontaires_sans_coordonnees:
         log(f"Volontaires sans coordonnées : {volontaires_sans_coordonnees}")
+
+    return rtn

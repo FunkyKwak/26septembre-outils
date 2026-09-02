@@ -162,7 +162,7 @@ class Worker(QThread):
 
     progress = Signal(int)
     log = Signal(str)
-    finished_ok = Signal()
+    finished_ok = Signal(str)
     error = Signal(str)
 
     def __init__(
@@ -186,7 +186,7 @@ class Worker(QThread):
 
     def run(self):
         try:
-            rapprochement.executer(
+            finished_message = rapprochement.executer(
                 self.fichier_signataires,
                 self.fichier_volontaires,
                 self.fichier_villes,
@@ -197,7 +197,7 @@ class Worker(QThread):
                 progress_callback=self.progress.emit,
                 log_callback=self.log.emit,
             )
-            self.finished_ok.emit()
+            self.finished_ok.emit(finished_message)
 
         except Exception as e:
             self.error.emit(f"{type(e).__name__}: {e}")
@@ -219,7 +219,7 @@ class MainWindow(QMainWindow):
         # -----------------------------------------------------
         # Fichier signataires
         # -----------------------------------------------------
-        layout.addWidget(QLabel("<b>1. Fichier des signataires</b>"))
+        layout.addWidget(QLabel("<b>Fichier des signataires</b>"))
         ligne = QHBoxLayout()
         self.fichier_signataires = DropLineEdit()
         self.fichier_signataires.setPlaceholderText("Choisir ou déposer le fichier CSV...")
@@ -233,7 +233,7 @@ class MainWindow(QMainWindow):
         # -----------------------------------------------------
         # Fichier volontaires
         # -----------------------------------------------------
-        layout.addWidget(QLabel("<b>2. Fichier des volontaires</b>"))
+        layout.addWidget(QLabel("<b>Fichier des volontaires</b>"))
         ligne = QHBoxLayout()
         self.fichier_volontaires = DropLineEdit()
         self.fichier_volontaires.setPlaceholderText("Choisir ou déposer le fichier CSV...")
@@ -247,7 +247,7 @@ class MainWindow(QMainWindow):
         # -----------------------------------------------------
         # Fichier villes
         # -----------------------------------------------------
-        layout.addWidget(QLabel("<b>2. Fichier des villes recensées</b>"))
+        layout.addWidget(QLabel("<b>Fichier des villes recensées</b>"))
         ligne = QHBoxLayout()
         self.fichier_villes = DropLineEdit()
         self.fichier_villes.setPlaceholderText("Choisir ou déposer le fichier CSV...")
@@ -261,7 +261,7 @@ class MainWindow(QMainWindow):
         # -----------------------------------------------------
         # Sélection villes
         # -----------------------------------------------------
-        layout.addWidget(QLabel("<b>3. Villes à traiter</b>"))
+        layout.addWidget(QLabel("<b>Villes à traiter</b>"))
         self.selection_villes = (MultiSelectList())
         self.selection_villes.setEnabled(False)
         layout.addWidget(self.selection_villes)
@@ -270,7 +270,7 @@ class MainWindow(QMainWindow):
         # -----------------------------------------------------
         # Dossier sortie
         # -----------------------------------------------------
-        layout.addWidget(QLabel("<b>4. Dossier de sortie</b>"))
+        layout.addWidget(QLabel("<b>Dossier de sortie</b>"))
         ligne = QHBoxLayout()
         self.dossier_sortie = DropLineEdit()
         self.dossier_sortie.setPlaceholderText("Choisir le dossier de sortie...")
@@ -471,12 +471,12 @@ class MainWindow(QMainWindow):
         self.worker.error.connect(self.erreur)
         self.worker.start()
 
-    def termine(self):
+    def termine(self, message=""):
         self.bouton_lancer.setEnabled(True)
         QMessageBox.information(
             self,
             "Terminé",
-            "Le rapprochement est terminé."
+            message
         )
 
     def erreur(self, message):
