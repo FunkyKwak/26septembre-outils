@@ -21,6 +21,6 @@ def resource_path(relative_path):
     print(f"[RESOURCE] frozen={getattr(sys, 'frozen', False)}")
     print(f"[RESOURCE] base_path={base_path}")
     print(f"[RESOURCE] relative_path={relative_path}")
-    print(f"[RESOURCE] exists={os.path.join(base_path, relative_path).exists()}")
+    print(f"[RESOURCE] exists={os.path.exists(os.path.join(base_path, relative_path))}")
 
     return os.path.join(base_path, relative_path)
