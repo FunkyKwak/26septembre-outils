@@ -9,7 +9,10 @@ Cet outil permet de lister les signataires les plus proches de chaque ville avec
 Il est possible de générer un fichier global pour l'ensemble des villes sélectionnées, ou un fichier pour chacune des villes sélectionnées.
 
 ### Exporter les fichiers CSV
-Sur la page des exports du site [26septembre.org](https://26septembre.org/admin/export) (accessible uniquement en tant qu''administrateur), télécharger le fichier des signataires et des villes recensées, en cochant bien toutes les cases.
+> [!CAUTION]
+> accessible uniquement aux administrateurs du site.
+
+Sur la page des exports du site [26septembre.org](https://26septembre.org/admin/export), télécharger le fichier des signataires et des villes recensées, en cochant bien toutes les cases.
 
 ![Export Signataires](docs/images/export_signataires.png)<br/>
 ![Export Villes](docs/images/export_villes.png)
@@ -19,7 +22,7 @@ Télécharger la dernière version du fichier `signataires_villes_proches.exe` d
 
 ### Lancer le programme
 > [!WARNING]
-> La première fois seulement : Ignorer l'alerte de Windows Defender (je n'ai pas payé de certificat, environ 300€/an) : Cliquer sur "Exécuter quand même".
+> La première fois seulement : Ignorer l'alerte de Windows Defender (je n'ai pas payé de certificat, environ 300€/an): Cliquer sur "Exécuter quand même".
 
 
 1. Renseigner les 2 fichiers précédemment exportés dans les champs correspondants (via glisser-déposer ou le bouton "Parcourir")
