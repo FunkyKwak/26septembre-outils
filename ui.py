@@ -293,7 +293,8 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(widget)
 
 
-        self.charger_liste_villes(self.fichier_villes.text())
+        if self.fichier_villes.text():
+            self.charger_liste_villes(self.fichier_villes.text())
 
 
     # =========================================================
