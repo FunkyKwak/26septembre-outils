@@ -55,7 +55,7 @@ def executer(
 
     log("Recherche des villes les plus proches...")
 
-    resultats = []
+    resultats = defaultdict(list)
 
     nombre_sans_coordonnees = 0
 
@@ -75,7 +75,7 @@ def executer(
             nombre_sans_coordonnees += 1
 
             if (villes_selectionnees == []):
-                resultats.append(volontaire)
+                resultats["toutes_villes"].append(volontaire)
             continue
 
         # --------------------------------------------------------
@@ -120,8 +120,10 @@ def executer(
             volontaire["Code postal ville"] = ""
             volontaire["Distance km"] = ""
 
-        if (villes_selectionnees == [] or ville_proche["ville"] in villes_selectionnees):
-            resultats.append(volontaire)
+        if (villes_selectionnees == []):
+            resultats["toutes_villes"].append(volontaire)
+        elif (ville_proche["ville"] in villes_selectionnees):
+            resultats[ville_proche["ville"]].append(volontaire)
 
         if index % 100 == 0:
             log(f"  {index}/{len(volontaires)} volontaires traités")
@@ -139,24 +141,57 @@ def executer(
         "Distance km",
     ]
 
-    fichier_sortie = dossier_sortie + "/volontaires_avec_ville.csv"
+    if separer_fichiers:
+        for ville, volontaires_ville in resultats.items():
 
-    with open(
-        fichier_sortie,
-        "w",
-        encoding="utf-8-sig",
-        newline=""
-    ) as fichier:
+            if ville:
+                nom_fichier = f"volontaires_{ville}.csv"
+            else:
+                nom_fichier = "volontaires_sans_ville.csv"
 
-        ecrivain = csv.DictWriter(
-            fichier,
-            fieldnames=colonnes_sortie,
-            delimiter=";",
-            extrasaction="ignore",
-        )
+            fichier_sortie = dossier_sortie + "/" + nom_fichier
 
-        ecrivain.writeheader()
-        ecrivain.writerows(resultats)
+            with open(
+                fichier_sortie,
+                "w",
+                encoding="utf-8-sig",
+                newline=""
+            ) as fichier:
+
+                ecrivain = csv.DictWriter(
+                    fichier,
+                    fieldnames=colonnes_sortie,
+                    delimiter=";",
+                    extrasaction="ignore",
+                )
+
+                ecrivain.writeheader()
+                ecrivain.writerows(volontaires_ville)
+    else:
+        if (villes_selectionnees == []):
+            fichier_sortie = dossier_sortie + "/volontaires_toutes_villes.csv"
+        elif (len(villes_selectionnees) == 1):
+            fichier_sortie = dossier_sortie + f"/volontaires_{villes_selectionnees[0]}.csv"
+        else:
+            fichier_sortie = dossier_sortie + "/volontaires_villes_selectionnees.csv"
+
+        with open(
+            fichier_sortie,
+            "w",
+            encoding="utf-8-sig",
+            newline=""
+        ) as fichier:
+
+            ecrivain = csv.DictWriter(
+                fichier,
+                fieldnames=colonnes_sortie,
+                delimiter=";",
+                extrasaction="ignore",
+            )
+
+            ecrivain.writeheader()
+            for ville, volontaires_ville in resultats.items():
+                ecrivain.writerows(volontaires_ville)
 
 
     # ============================================================
