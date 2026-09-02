@@ -15,7 +15,7 @@ Il est possible de générer un fichier global pour l'ensemble des villes sélec
 Sur la page des exports du site [26septembre.org](https://26septembre.org/admin/export), télécharger le fichier des signataires et des villes recensées, en cochant bien toutes les cases.
 
 ![Export Signataires](docs/images/export_signataires.png)<br/>
-![Export Villes](docs/images/export_villes.png)
+![Export Villes](docs/images/export_volontaires_villes.png)
 
 ### Télécharger l'outil
 Télécharger la dernière version du fichier `signataires_villes_proches.exe` dans les [releases](https://github.com/FunkyKwak/26septembre-outils/releases).
@@ -25,7 +25,7 @@ Télécharger la dernière version du fichier `signataires_villes_proches.exe` d
 > La première fois seulement : Ignorer l'alerte de Windows Defender (je n'ai pas payé de certificat, environ 300€/an): Cliquer sur "Exécuter quand même".
 
 
-1. Renseigner les 2 fichiers précédemment exportés dans les champs correspondants (via glisser-déposer ou le bouton "Parcourir")
+1. Renseigner les 3 fichiers précédemment exportés dans les champs correspondants (via glisser-déposer ou le bouton "Parcourir")
 2. Sélectionner une ou plusieurs villes selon le besoin
 3. Choisir un dossier de sortiie, dans lequel seront générés les fichiers
 3. Cocher la case "Créer un fichier CSV séparé pour chaque ville" si besoin, poour par exemple pouvoir envoyer les fichiers séparéments à l''organisation de la marche dans chaque ville 
