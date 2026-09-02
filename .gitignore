@@ -216,3 +216,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+
+# Ignorer tous les CSV
+*.csv
+# Sauf ceux-ci
+!csv/public/*.csv
