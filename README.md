@@ -22,7 +22,7 @@ Télécharger la dernière version du fichier `signataires_villes_proches.exe` d
 
 ### Lancer le programme
 > [!WARNING]
-> La première fois seulement : Ignorer l'alerte de Windows Defender (je n'ai pas payé de certificat, environ 300€/an): Cliquer sur "Exécuter quand même".
+> La première fois seulement : Ignorer l'alerte de Windows Defender (je n'ai pas payé de certificat, environ 300€/an): Cliquer sur "Informations complémentaires > Exécuter quand même".
 
 
 1. Renseigner les 3 fichiers précédemment exportés dans les champs correspondants (via glisser-déposer ou le bouton "Parcourir")
