@@ -1,4 +1,4 @@
-name: Build Windows Release - Signataires Villes Proches
+name: Build Windows Release - Signataires et volontaires proches
 
 on:
   push:
@@ -37,11 +37,11 @@ jobs:
             --windowed `
             --onefile `
             --add-data "csv\public:csv\public" `
-            --name "Signataires_Villes_Proches" `
+            --name "Signataires_Volontaires_Proches" `
             main.py
 
       - name: Create GitHub Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "dist/signataires_villes_proches.exe"
+          artifacts: "dist/signataires_volontaires_proches.exe"
           generateReleaseNotes: true
