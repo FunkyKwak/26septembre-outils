@@ -36,6 +36,7 @@ jobs:
             --clean `
             --windowed `
             --onefile `
+            --add-data "csv\public" `
             --name "Signataires_Villes_Proches" `
             main.py
 
