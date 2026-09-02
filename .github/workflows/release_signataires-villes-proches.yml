@@ -34,7 +34,6 @@ jobs:
           pyinstaller `
             --noconfirm `
             --clean `
-            --windowed `
             --onefile `
             --add-data "csv\public:csv\public" `
             --name "Signataires_Villes_Proches" `
