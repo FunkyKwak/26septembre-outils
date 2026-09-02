@@ -168,6 +168,7 @@ class Worker(QThread):
     def __init__(
         self,
         fichier_signataires,
+        fichier_volontaires,
         fichier_villes,
         fichier_codes_postaux,
         dossier_sortie,
@@ -176,6 +177,7 @@ class Worker(QThread):
     ):
         super().__init__()
         self.fichier_signataires = (fichier_signataires)
+        self.fichier_volontaires = (fichier_volontaires)
         self.fichier_villes = fichier_villes
         self.fichier_codes_postaux = (fichier_codes_postaux)
         self.dossier_sortie = dossier_sortie
@@ -186,6 +188,7 @@ class Worker(QThread):
         try:
             rapprochement.executer(
                 self.fichier_signataires,
+                self.fichier_volontaires,
                 self.fichier_villes,
                 self.fichier_codes_postaux,
                 self.dossier_sortie,
@@ -204,7 +207,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Signataires les plus proches de chaque mobilisation")
+        self.setWindowTitle("Signataires et volontaires les plus proches de chaque mobilisation")
         self.resize(750, 600)
         self.worker = None
         self._construire_interface()
@@ -224,6 +227,20 @@ class MainWindow(QMainWindow):
         bouton = QPushButton("Parcourir…")
         bouton.clicked.connect(self.choisir_signataires)
         ligne.addWidget(self.fichier_signataires)
+        ligne.addWidget(bouton)
+        layout.addLayout(ligne)
+
+        # -----------------------------------------------------
+        # Fichier volontaires
+        # -----------------------------------------------------
+        layout.addWidget(QLabel("<b>2. Fichier des volontaires</b>"))
+        ligne = QHBoxLayout()
+        self.fichier_volontaires = DropLineEdit()
+        self.fichier_volontaires.setPlaceholderText("Choisir ou déposer le fichier CSV...")
+        self.fichier_volontaires.setText(os.getenv("DEFAULT_FICHIER_VOLONTAIRES", ""))
+        bouton = QPushButton("Parcourir…")
+        bouton.clicked.connect(self.choisir_volontaires)
+        ligne.addWidget(self.fichier_volontaires)
         ligne.addWidget(bouton)
         layout.addLayout(ligne)
 
@@ -273,7 +290,7 @@ class MainWindow(QMainWindow):
         # -----------------------------------------------------
         # Bouton lancement
         # -----------------------------------------------------
-        self.bouton_lancer = QPushButton("Trouver les signataires les plus proches des villes sélectionées")
+        self.bouton_lancer = QPushButton("Trouver les signataires/volontaires les plus proches des villes sélectionées")
         self.bouton_lancer.setMinimumHeight(40)
         self.bouton_lancer.clicked.connect(self.lancer)
         layout.addWidget(self.bouton_lancer)
@@ -313,6 +330,16 @@ class MainWindow(QMainWindow):
         )
         if chemin:
             self.fichier_signataires.setText(chemin)
+
+    def choisir_volontaires(self):
+        chemin, _ = QFileDialog.getOpenFileName(
+            self,
+            "Fichier des volontaires",
+            "",
+            "Fichiers CSV (*.csv);;Tous les fichiers (*)"
+        )
+        if chemin:
+            self.fichier_volontaires.setText(chemin)
 
     def choisir_villes(self):
         chemin, _ = QFileDialog.getOpenFileName(
@@ -384,15 +411,16 @@ class MainWindow(QMainWindow):
     def lancer(self):
 
         fichier_signataires = (self.fichier_signataires.text())
+        fichier_volontaires = (self.fichier_volontaires.text())
         fichier_villes = (self.fichier_villes.text())
         fichier_codes = (config.FICHIER_CODES_POSTAUX)
         dossier_sortie = (self.dossier_sortie.text())
 
-        if not fichier_signataires:
+        if not fichier_signataires and not fichier_volontaires:
             QMessageBox.warning(
                 self,
                 "Fichier manquant",
-                "Sélectionnez le fichier des signataires."
+                "Sélectionnez le fichier des signataires ou des volontaires."
             )
             return
 
@@ -429,6 +457,7 @@ class MainWindow(QMainWindow):
 
         self.worker = Worker(
             fichier_signataires,
+            fichier_volontaires,
             fichier_villes,
             fichier_codes,
             dossier_sortie,

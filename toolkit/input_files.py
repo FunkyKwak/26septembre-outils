@@ -135,3 +135,40 @@ def read_csv_signataires(fichier_signataires, log=None):
     log(f"{len(signataires)} signataires chargés.")
 
     return signataires, colonnes_originales
+
+
+
+def read_csv_volontaires(fichier_volontaires, log=None):
+
+    if log is None:
+        log = print
+
+    log("Chargement des volontaires...")
+
+    volontaires = []
+
+    with open(
+        fichier_volontaires,
+        "r",
+        encoding="utf-8-sig",
+        newline=""
+    ) as fichier:
+
+        # Le fichier commence par "sep=;" : on l'ignore
+        premiere_ligne = fichier.readline()
+
+        lecteur = csv.DictReader(fichier, delimiter=";")
+
+        # On conserve exactement les colonnes originales de A
+        colonnes_originales = lecteur.fieldnames
+
+        for ligne in lecteur:
+            volontaires.append(ligne)
+
+
+    log(f"{len(volontaires)} volontaires chargés.")
+
+    return volontaires, colonnes_originales
+
+
+            
