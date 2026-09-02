@@ -204,7 +204,7 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Rapprochement des volontaires")
+        self.setWindowTitle("Signataires les plus proches de chaque mobilisation")
         self.resize(750, 600)
         self.worker = None
         self._construire_interface()
@@ -273,7 +273,7 @@ class MainWindow(QMainWindow):
         # -----------------------------------------------------
         # Bouton lancement
         # -----------------------------------------------------
-        self.bouton_lancer = QPushButton("Lancer le rapprochement")
+        self.bouton_lancer = QPushButton("Trouver les signataires les plus proches des villes sélectionées")
         self.bouton_lancer.setMinimumHeight(40)
         self.bouton_lancer.clicked.connect(self.lancer)
         layout.addWidget(self.bouton_lancer)
