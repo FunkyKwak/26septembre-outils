@@ -5,150 +5,164 @@ from collections import defaultdict
 from toolkit import input_files
 
 
-# ============================================================
-# CONFIGURATION
-# ============================================================
-
-FICHIER_VOLONTAIRES = "csv\\test\\signataires-26septembre-2026-09-01.csv"
-FICHIER_VILLES = "csv\\public\\recensements-26septembre-2026-09-01.csv"
-FICHIER_CODES_POSTAUX = "csv\\public\\base-officielle-codes-postaux.csv"
-FICHIER_SORTIE = "csv\\test\\OUT_volontaires_avec_ville.csv"
 
 
-
-# ============================================================
-# 1. CHARGEMENT DES COORDONNÉES DES CODES POSTAUX
-# ============================================================
-communes_par_code_postal = input_files.read_csv_codes_postaux(FICHIER_CODES_POSTAUX)
-
-
-# ============================================================
-# 2. CHARGEMENT DES VILLES RECENSÉES
-# ============================================================
-villes = input_files.read_csv_villes(FICHIER_VILLES)
+def executer(
+        fichier_volontaires, fichier_villes, fichier_codes_postaux,
+        dossier_sortie,
+        villes_selectionnees, separer_fichiers,
+        progress_callback=None,
+        log_callback=None
+    ):
 
 
-# ============================================================
-# 3. CHARGEMENT DES VOLONTAIRES
-# ============================================================
-volontaires, colonnes_originales = input_files.read_csv_volontaires(FICHIER_VOLONTAIRES)
+    def log(message):
+        if log_callback:
+            log_callback(message)
+
+    def progress(value):
+        if progress_callback:
+            progress_callback(value)
 
 
-# ============================================================
-# 4. RECHERCHE DE LA VILLE LA PLUS PROCHE
-# ============================================================
+    # ============================================================
+    # 1. CHARGEMENT DES COORDONNÉES DES CODES POSTAUX
+    # ============================================================
+    log("Chargement de la base des codes postaux...")
+    communes_par_code_postal = input_files.read_csv_codes_postaux(fichier_codes_postaux)
+    log(f"{len(communes_par_code_postal)} codes postaux chargés.")
 
-print("Recherche des villes les plus proches...")
 
-resultats = []
+    # ============================================================
+    # 2. CHARGEMENT DES VILLES RECENSÉES
+    # ============================================================
+    log("Chargement des villes recensées...")
+    villes = input_files.read_csv_villes(fichier_villes, communes_par_code_postal)
+    log(f"{len(villes)} villes recensées chargées.")
 
-nombre_sans_coordonnees = 0
 
-for index, volontaire in enumerate(volontaires, start=1):
+    # ============================================================
+    # 3. CHARGEMENT DES VOLONTAIRES
+    # ============================================================
+    log("Chargement des volontaires...")
+    volontaires, colonnes_originales = input_files.read_csv_volontaires(fichier_volontaires)
+    log(f"{len(volontaires)} volontaires chargés.")
 
-    code_postal = coordinates.normaliser_code_postal(
-        volontaire["Code postal"]
-    )
 
-    communes = communes_par_code_postal.get(code_postal)
+    # ============================================================
+    # 4. RECHERCHE DE LA VILLE LA PLUS PROCHE
+    # ============================================================
 
-    if not communes:
-        volontaire["Ville la plus proche"] = ""
-        volontaire["Code postal ville"] = ""
-        volontaire["Distance km"] = ""
+    log("Recherche des villes les plus proches...")
 
-        nombre_sans_coordonnees += 1
-        resultats.append(volontaire)
-        continue
+    resultats = []
 
-    # --------------------------------------------------------
-    # On choisit la première commune correspondant au CP.
-    # --------------------------------------------------------
+    nombre_sans_coordonnees = 0
 
-    commune = communes[0]
+    for index, volontaire in enumerate(volontaires, start=1):
 
-    latitude = commune["latitude"]
-    longitude = commune["longitude"]
-
-    # --------------------------------------------------------
-    # Recherche de la ville B la plus proche
-    # --------------------------------------------------------
-
-    ville_proche = None
-    distance_min = float("inf")
-
-    for ville in villes:
-
-        distance = coordinates.distance_km(
-            latitude,
-            longitude,
-            ville["latitude"],
-            ville["longitude"],
+        code_postal = coordinates.normaliser_code_postal(
+            volontaire["Code postal"]
         )
 
-        if distance < distance_min:
-            distance_min = distance
-            ville_proche = ville
+        communes = communes_par_code_postal.get(code_postal)
 
-    # --------------------------------------------------------
-    # Ajout du résultat
-    # --------------------------------------------------------
+        if not communes:
+            volontaire["Ville la plus proche"] = ""
+            volontaire["Code postal ville"] = ""
+            volontaire["Distance km"] = ""
 
-    if ville_proche:
-        volontaire["Ville la plus proche"] = ville_proche["ville"]
-        volontaire["Code postal ville"] = ville_proche["code_postal"]
-        volontaire["Distance km"] = f"{distance_min:.1f}".replace(".", ",")
-    else:
-        volontaire["Ville la plus proche"] = ""
-        volontaire["Code postal ville"] = ""
-        volontaire["Distance km"] = ""
+            nombre_sans_coordonnees += 1
+            resultats.append(volontaire)
+            continue
 
-    resultats.append(volontaire)
+        # --------------------------------------------------------
+        # On choisit la première commune correspondant au CP.
+        # --------------------------------------------------------
 
-    if index % 100 == 0:
-        print(f"  {index}/{len(volontaires)} volontaires traités")
+        commune = communes[0]
+
+        latitude = commune["latitude"]
+        longitude = commune["longitude"]
+
+        # --------------------------------------------------------
+        # Recherche de la ville B la plus proche
+        # --------------------------------------------------------
+
+        ville_proche = None
+        distance_min = float("inf")
+
+        for ville in villes:
+
+            distance = coordinates.distance_km(
+                latitude,
+                longitude,
+                ville["latitude"],
+                ville["longitude"],
+            )
+
+            if distance < distance_min:
+                distance_min = distance
+                ville_proche = ville
+
+        # --------------------------------------------------------
+        # Ajout du résultat
+        # --------------------------------------------------------
+
+        if ville_proche:
+            volontaire["Ville la plus proche"] = ville_proche["ville"]
+            volontaire["Code postal ville"] = ville_proche["code_postal"]
+            volontaire["Distance km"] = f"{distance_min:.1f}".replace(".", ",")
+        else:
+            volontaire["Ville la plus proche"] = ""
+            volontaire["Code postal ville"] = ""
+            volontaire["Distance km"] = ""
+
+        resultats.append(volontaire)
+
+        if index % 100 == 0:
+            log(f"  {index}/{len(volontaires)} volontaires traités")
 
 
-# ============================================================
-# 5. ÉCRITURE DU CSV FINAL
-# ============================================================
+    # ============================================================
+    # 5. ÉCRITURE DU CSV FINAL
+    # ============================================================
 
-print("Écriture du fichier résultat...")
+    log("Écriture du fichier résultat...")
 
-colonnes_sortie = list(colonnes_originales) + [
-    "Ville la plus proche",
-    "Code postal ville",
-    "Distance km",
-]
+    colonnes_sortie = list(colonnes_originales) + [
+        "Ville la plus proche",
+        "Code postal ville",
+        "Distance km",
+    ]
 
-with open(
-    FICHIER_SORTIE,
-    "w",
-    encoding="utf-8-sig",
-    newline=""
-) as fichier:
+    fichier_sortie = dossier_sortie + "/volontaires_avec_ville.csv"
 
-    ecrivain = csv.DictWriter(
-        fichier,
-        fieldnames=colonnes_sortie,
-        delimiter=";",
-        extrasaction="ignore",
-    )
+    with open(
+        fichier_sortie,
+        "w",
+        encoding="utf-8-sig",
+        newline=""
+    ) as fichier:
 
-    ecrivain.writeheader()
-    ecrivain.writerows(resultats)
+        ecrivain = csv.DictWriter(
+            fichier,
+            fieldnames=colonnes_sortie,
+            delimiter=";",
+            extrasaction="ignore",
+        )
+
+        ecrivain.writeheader()
+        ecrivain.writerows(resultats)
 
 
-# ============================================================
-# 6. RÉSUMÉ
-# ============================================================
+    # ============================================================
+    # 6. RÉSUMÉ
+    # ============================================================
 
-print()
-print("Terminé !")
-print(f"Résultat : {FICHIER_SORTIE}")
-print(f"Volontaires : {len(volontaires)}")
+    log("Terminé !")
+    log(f"Résultat : {fichier_sortie}")
+    log(f"Volontaires : {len(volontaires)}")
 
-if nombre_sans_coordonnees:
-    print(
-        f"Sans coordonnées : {nombre_sans_coordonnees}"
-    )
+    if nombre_sans_coordonnees:
+        log(f"Sans coordonnées : {nombre_sans_coordonnees}")
