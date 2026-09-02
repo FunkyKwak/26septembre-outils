@@ -415,10 +415,7 @@ class MainWindow(QMainWindow):
             )
             return
 
-        villes = (
-            self.selection_villes
-            .villes_selectionnees()
-        )
+        villes = (self.selection_villes.villes_selectionnees())
 
         self.logs.clear()
         self.progression.setValue(0)

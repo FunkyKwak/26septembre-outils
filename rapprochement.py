@@ -73,7 +73,9 @@ def executer(
             volontaire["Distance km"] = ""
 
             nombre_sans_coordonnees += 1
-            resultats.append(volontaire)
+
+            if (villes_selectionnees == []):
+                resultats.append(volontaire)
             continue
 
         # --------------------------------------------------------
@@ -118,7 +120,8 @@ def executer(
             volontaire["Code postal ville"] = ""
             volontaire["Distance km"] = ""
 
-        resultats.append(volontaire)
+        if (villes_selectionnees == [] or ville_proche["ville"] in villes_selectionnees):
+            resultats.append(volontaire)
 
         if index % 100 == 0:
             log(f"  {index}/{len(volontaires)} volontaires traités")
