@@ -1,3 +1,5 @@
+import os
+
 from PySide6.QtCore import (
     Qt,
     QThread,
@@ -218,7 +220,7 @@ class MainWindow(QMainWindow):
         ligne = QHBoxLayout()
         self.fichier_volontaires = DropLineEdit()
         self.fichier_volontaires.setPlaceholderText("Choisir ou déposer le fichier CSV...")
-        self.fichier_volontaires.setText(config.DEFAULT_FICHIER_VOLONTAIRES)
+        self.fichier_volontaires.setText(os.getenv("DEFAULT_FICHIER_VOLONTAIRES", ""))
         bouton = QPushButton("Parcourir…")
         bouton.clicked.connect(self.choisir_volontaires)
         ligne.addWidget(self.fichier_volontaires)
@@ -232,7 +234,7 @@ class MainWindow(QMainWindow):
         ligne = QHBoxLayout()
         self.fichier_villes = DropLineEdit()
         self.fichier_villes.setPlaceholderText("Choisir ou déposer le fichier CSV...")
-        self.fichier_villes.setText(config.DEFAULT_FICHIER_VILLES)
+        self.fichier_villes.setText(os.getenv("DEFAULT_FICHIER_VILLES", ""))
         bouton = QPushButton("Parcourir…")
         bouton.clicked.connect(self.choisir_villes)
         ligne.addWidget(self.fichier_villes)
@@ -255,7 +257,7 @@ class MainWindow(QMainWindow):
         ligne = QHBoxLayout()
         self.dossier_sortie = DropLineEdit()
         self.dossier_sortie.setPlaceholderText("Choisir le dossier de sortie...")
-        self.dossier_sortie.setText(config.DEFAULT_DOSSIER_SORTIE)
+        self.dossier_sortie.setText(os.getenv("DEFAULT_DOSSIER_SORTIE", ""))
         bouton = QPushButton("Parcourir…")
         bouton.clicked.connect(self.choisir_dossier)
         ligne.addWidget(self.dossier_sortie)

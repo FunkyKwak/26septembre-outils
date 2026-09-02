@@ -221,4 +221,4 @@ __marimo__/
 # Ignorer tous les CSV
 *.csv
 # Sauf ceux-ci
-!csv/public/*.csv
+!csv/public/base-officielle-codes-postaux.csv
