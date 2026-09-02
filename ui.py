@@ -297,6 +297,9 @@ class MainWindow(QMainWindow):
             self.charger_liste_villes(self.fichier_villes.text())
 
 
+    def log(self, message):
+        self.logs.addItem(message)
+
     # =========================================================
     # CHOIX FICHIERS
     # =========================================================
@@ -355,9 +358,9 @@ class MainWindow(QMainWindow):
 
         try:
 
-            codes_postaux = input_files.read_csv_codes_postaux(fichier_codes)
+            codes_postaux = input_files.read_csv_codes_postaux(fichier_codes, log=self.log)
 
-            villes = input_files.read_csv_villes(chemin, codes_postaux)
+            villes = input_files.read_csv_villes(chemin, codes_postaux, log=self.log)
 
             noms = [
                 ville["ville"]
@@ -366,7 +369,6 @@ class MainWindow(QMainWindow):
 
             self.selection_villes.definir_villes(noms)
             self.selection_villes.setEnabled(True)
-            self.logs.addItem(f"{len(noms)} villes disponibles.")
 
         except Exception as e:
             QMessageBox.critical(

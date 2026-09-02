@@ -5,13 +5,17 @@
 
 from collections import defaultdict
 import csv
+from logging import log
 
 from toolkit import coordinates
 
 
-def  read_csv_codes_postaux(fichier_codes_postaux):
+def  read_csv_codes_postaux(fichier_codes_postaux, log=None):
 
-    print("Chargement de la base des codes postaux...")
+    if log is None:
+        log = print
+
+    log("Chargement de la base des codes postaux...")
 
     # code postal -> liste de communes
     communes_par_code_postal = defaultdict(list)
@@ -41,18 +45,19 @@ def  read_csv_codes_postaux(fichier_codes_postaux):
             })
 
 
-    print(
-        f"{len(communes_par_code_postal)} codes postaux chargés."
-    )
+    log(f"{len(communes_par_code_postal)} codes postaux chargés.")
 
     return communes_par_code_postal
 
 
 
 
-def read_csv_villes(fichier_villes, communes_par_code_postal):
+def read_csv_villes(fichier_villes, communes_par_code_postal, log=None):
     
-    print("Chargement des villes recensées...")
+    if log is None:
+        log = print
+
+    log("Chargement des villes recensées...")
 
     villes = []
 
@@ -74,7 +79,7 @@ def read_csv_villes(fichier_villes, communes_par_code_postal):
             communes = communes_par_code_postal.get(code_postal)
 
             if not communes:
-                print(
+                log(
                     f"Attention : aucun géopoint trouvé pour "
                     f"le code postal {code_postal} "
                     f"({ligne['Ville']})"
@@ -93,15 +98,18 @@ def read_csv_villes(fichier_villes, communes_par_code_postal):
             })
 
 
-    print(f"{len(villes)} villes recensées chargées.")
+    log(f"{len(villes)} villes recensées chargées.")
 
     return villes
 
 
 
-def read_csv_volontaires(fichier_volontaires):
+def read_csv_volontaires(fichier_volontaires, log=None):
 
-    print("Chargement des volontaires...")
+    if log is None:
+        log = print
+
+    log("Chargement des volontaires...")
 
     volontaires = []
 
@@ -124,6 +132,6 @@ def read_csv_volontaires(fichier_volontaires):
             volontaires.append(ligne)
 
 
-    print(f"{len(volontaires)} volontaires chargés.")
+    log(f"{len(volontaires)} volontaires chargés.")
 
     return volontaires, colonnes_originales
