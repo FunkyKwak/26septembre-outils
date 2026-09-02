@@ -290,7 +290,7 @@ class MainWindow(QMainWindow):
         # -----------------------------------------------------
         # Bouton lancement
         # -----------------------------------------------------
-        self.bouton_lancer = QPushButton("Trouver les signataires/volontaires les plus proches des villes sélectionées")
+        self.bouton_lancer = QPushButton("Trouver les signataires et volontaires les plus proches des villes sélectionées")
         self.bouton_lancer.setMinimumHeight(40)
         self.bouton_lancer.clicked.connect(self.lancer)
         layout.addWidget(self.bouton_lancer)
