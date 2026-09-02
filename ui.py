@@ -167,7 +167,7 @@ class Worker(QThread):
 
     def __init__(
         self,
-        fichier_volontaires,
+        fichier_signataires,
         fichier_villes,
         fichier_codes_postaux,
         dossier_sortie,
@@ -175,7 +175,7 @@ class Worker(QThread):
         separer_fichiers,
     ):
         super().__init__()
-        self.fichier_volontaires = (fichier_volontaires)
+        self.fichier_signataires = (fichier_signataires)
         self.fichier_villes = fichier_villes
         self.fichier_codes_postaux = (fichier_codes_postaux)
         self.dossier_sortie = dossier_sortie
@@ -185,7 +185,7 @@ class Worker(QThread):
     def run(self):
         try:
             rapprochement.executer(
-                self.fichier_volontaires,
+                self.fichier_signataires,
                 self.fichier_villes,
                 self.fichier_codes_postaux,
                 self.dossier_sortie,
@@ -214,16 +214,16 @@ class MainWindow(QMainWindow):
         layout = QVBoxLayout(widget)
 
         # -----------------------------------------------------
-        # Fichier volontaires
+        # Fichier signataires
         # -----------------------------------------------------
-        layout.addWidget(QLabel("<b>1. Fichier des volontaires</b>"))
+        layout.addWidget(QLabel("<b>1. Fichier des signataires</b>"))
         ligne = QHBoxLayout()
-        self.fichier_volontaires = DropLineEdit()
-        self.fichier_volontaires.setPlaceholderText("Choisir ou déposer le fichier CSV...")
-        self.fichier_volontaires.setText(os.getenv("DEFAULT_FICHIER_VOLONTAIRES", ""))
+        self.fichier_signataires = DropLineEdit()
+        self.fichier_signataires.setPlaceholderText("Choisir ou déposer le fichier CSV...")
+        self.fichier_signataires.setText(os.getenv("DEFAULT_FICHIER_SIGNATAIRES", ""))
         bouton = QPushButton("Parcourir…")
-        bouton.clicked.connect(self.choisir_volontaires)
-        ligne.addWidget(self.fichier_volontaires)
+        bouton.clicked.connect(self.choisir_signataires)
+        ligne.addWidget(self.fichier_signataires)
         ligne.addWidget(bouton)
         layout.addLayout(ligne)
 
@@ -304,15 +304,15 @@ class MainWindow(QMainWindow):
     # CHOIX FICHIERS
     # =========================================================
 
-    def choisir_volontaires(self):
+    def choisir_signataires(self):
         chemin, _ = QFileDialog.getOpenFileName(
             self,
-            "Fichier des volontaires",
+            "Fichier des signataires",
             "",
             "Fichiers CSV (*.csv);;Tous les fichiers (*)"
         )
         if chemin:
-            self.fichier_volontaires.setText(chemin)
+            self.fichier_signataires.setText(chemin)
 
     def choisir_villes(self):
         chemin, _ = QFileDialog.getOpenFileName(
@@ -383,16 +383,16 @@ class MainWindow(QMainWindow):
 
     def lancer(self):
 
-        fichier_volontaires = (self.fichier_volontaires.text())
+        fichier_signataires = (self.fichier_signataires.text())
         fichier_villes = (self.fichier_villes.text())
         fichier_codes = (config.FICHIER_CODES_POSTAUX)
         dossier_sortie = (self.dossier_sortie.text())
 
-        if not fichier_volontaires:
+        if not fichier_signataires:
             QMessageBox.warning(
                 self,
                 "Fichier manquant",
-                "Sélectionnez le fichier des volontaires."
+                "Sélectionnez le fichier des signataires."
             )
             return
 
@@ -428,7 +428,7 @@ class MainWindow(QMainWindow):
         self.bouton_lancer.setEnabled(False)
 
         self.worker = Worker(
-            fichier_volontaires,
+            fichier_signataires,
             fichier_villes,
             fichier_codes,
             dossier_sortie,

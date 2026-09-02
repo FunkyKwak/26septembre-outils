@@ -104,17 +104,17 @@ def read_csv_villes(fichier_villes, communes_par_code_postal, log=None):
 
 
 
-def read_csv_volontaires(fichier_volontaires, log=None):
+def read_csv_signataires(fichier_signataires, log=None):
 
     if log is None:
         log = print
 
-    log("Chargement des volontaires...")
+    log("Chargement des signataires...")
 
-    volontaires = []
+    signataires = []
 
     with open(
-        fichier_volontaires,
+        fichier_signataires,
         "r",
         encoding="utf-8-sig",
         newline=""
@@ -129,9 +129,9 @@ def read_csv_volontaires(fichier_volontaires, log=None):
         colonnes_originales = lecteur.fieldnames
 
         for ligne in lecteur:
-            volontaires.append(ligne)
+            signataires.append(ligne)
 
 
-    log(f"{len(volontaires)} volontaires chargés.")
+    log(f"{len(signataires)} signataires chargés.")
 
-    return volontaires, colonnes_originales
+    return signataires, colonnes_originales
